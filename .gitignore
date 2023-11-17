@@ -134,5 +134,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 wandb
-run.sh
-sweep.yaml
+# run.sh
+# sweep.yaml

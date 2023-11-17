@@ -1,0 +1,24 @@
+program: main.py # the program to run
+method: grid # among bayes, grid, random
+metric:
+  name: errors/test_mape # need to log this metric in your code
+  goal: minimize # among minimize, maximize
+parameters:
+  dataset:
+    # values: ['metr-la', 'pems-bay', 'pemsd7-m']
+    values: ['metr-la', 'pems-bay']
+  n_components:
+    values: [1,2,3,4,5]
+    # values: [1]
+  mix_mean:
+    values: ["True", "False"]
+    # values: ["True"]
+    # values: ["False"]
+  rho:
+    values: [1]
+    # values: [0]
+    # values: [0, 0.01, 0.1, 0.5 ,0.9, 0.99, 1]
+  seed:
+    values: [1]
+    # values: [5,6,7,8]
+  
