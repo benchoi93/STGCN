@@ -22,7 +22,7 @@ def load_adj(dataset_name):
 def load_data(dataset_name, len_train, len_val):
     dataset_path = './data'
     dataset_path = os.path.join(dataset_path, dataset_name)
-    vel = pd.read_csv(os.path.join(dataset_path, 'vel.csv'))
+    vel = pd.read_csv(os.path.join(dataset_path, 'vel.csv'), header=None).values
 
     train = vel[: len_train]
     val = vel[len_train: len_train + len_val]
@@ -37,12 +37,13 @@ def data_transform(data, n_his, n_pred, device):
     num = len_record - n_his - n_pred
     
     x = np.zeros([num, 1, n_his, n_vertex])
-    y = np.zeros([num, n_vertex])
+    y = np.zeros([num, 1, n_pred,n_vertex])
     
     for i in range(num):
         head = i
         tail = i + n_his
         x[i, :, :, :] = data[head: tail].reshape(1, n_his, n_vertex)
-        y[i] = data[tail + n_pred - 1]
+        # y[i] = data[tail + n_pred - 1]
+        y[i, :, :, :] = data[tail: tail + n_pred].reshape(1, n_pred, n_vertex)
 
     return torch.Tensor(x).to(device), torch.Tensor(y).to(device)

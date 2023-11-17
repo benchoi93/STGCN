@@ -268,22 +268,39 @@ class OutputBlock(nn.Module):
     # F: Fully-Connected Layer
     # F: Fully-Connected Layer
 
-    def __init__(self, Ko, last_block_channel, channels, end_channel, n_vertex, act_func, bias, droprate):
+    def __init__(self, Ko, last_block_channel, channels, end_channel, n_vertex, act_func, bias, droprate, n_components):
         super(OutputBlock, self).__init__()
+
+        self.num_nodes = n_vertex
+        self.n_components = n_components
+        self.pred_n = end_channel
+
         self.tmp_conv1 = TemporalConvLayer(Ko, last_block_channel, channels[0], n_vertex, act_func)
         self.fc1 = nn.Linear(in_features=channels[0], out_features=channels[1], bias=bias)
-        self.fc2 = nn.Linear(in_features=channels[1], out_features=end_channel, bias=bias)
+        self.fc2 = nn.Linear(in_features=channels[1], out_features=end_channel*n_components, bias=bias)
         self.tc1_ln = nn.LayerNorm([n_vertex, channels[0]])
         self.relu = nn.ReLU()
         self.leaky_relu = nn.LeakyReLU()
         self.silu = nn.SiLU()
         self.dropout = nn.Dropout(p=droprate)
 
+        self.fc3 = nn.Linear(in_features=self.num_nodes * channels[1], out_features=channels[1], bias=bias)
+        self.fc4 = nn.Linear(in_features=channels[1], out_features=channels[1], bias=bias)
+        self.fc5 = nn.Linear(in_features=channels[1], out_features=n_components, bias=bias)
+
     def forward(self, x):
         x = self.tmp_conv1(x)
         x = self.tc1_ln(x.permute(0, 2, 3, 1))
         x = self.fc1(x)
         x = self.relu(x)
-        x = self.fc2(x).permute(0, 3, 1, 2)
+        
+        yhat = self.fc2(x).reshape(x.shape[0], x.shape[1], self.num_nodes, self.n_components, self.pred_n)
+        yhat = yhat.permute(0, 1, 3, 4, 2)[:,0]
+        logw = self.fc3(x.reshape(x.shape[0],-1))
+        logw = self.leaky_relu(logw)
+        logw = self.fc4(logw)
+        logw = self.leaky_relu(logw)
+        logw = self.fc5(logw)
+        logw = torch.log_softmax(logw, dim=1)
 
-        return x
+        return yhat, logw
