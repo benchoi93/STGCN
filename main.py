@@ -40,7 +40,7 @@ def get_parameters():
     parser = argparse.ArgumentParser(description='STGCN')
     parser.add_argument('--enable_cuda', type=bool, default=True, help='enable CUDA, default as True')
     parser.add_argument('--seed', type=int, default=42, help='set the random seed for stabilizing experiment results')
-    parser.add_argument('--dataset', type=str, default='metr-la', choices=['metr-la', 'pems-bay', 'pemsd7-m'])
+    parser.add_argument('--dataset', type=str, default='metr-la', choices=['metr-la', 'pems-bay', 'pemsd7-m','pems-bay-2022flow','pems-bay-2022speed'])
     # parser.add_argument('--dataset', type=str, default='pems-bay', choices=['metr-la', 'pems-bay', 'pemsd7-m'])
     parser.add_argument('--n_his', type=int, default=12)
     parser.add_argument('--n_pred', type=int, default=12, help='the number of time interval for predcition, default as 3')
