@@ -67,6 +67,10 @@ def get_parameters():
     parser.add_argument('--mix_mean', type=str, default="True", help='mix mean for loss function')
     args = parser.parse_args()
     print('Training configs: {}'.format(args))
+
+    if args.n_components == 0:
+        args.rho = 0
+        args.n_components = 1
     
     # For stable experiment results
     set_env(args.seed)
@@ -574,6 +578,9 @@ if __name__ == "__main__":
 
     wandb.init(project="STGCN_1114", config=args)
     args.mix_mean = args.mix_mean == "True"
+
+    print(args)
+    print(wandb.config)
     
     n_vertex, zscore, train_iter, val_iter, test_iter = data_preparate(args, device)
     loss, es, model, optimizer, scheduler, covariance = prepare_model(args, blocks, n_vertex)
